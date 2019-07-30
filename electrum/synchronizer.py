@@ -262,7 +262,7 @@ class Synchronizer(SynchronizerBase):
                 self.wallet.set_up_to_date(up_to_date)
                 self.wallet.network.trigger_callback('wallet_updated', self.wallet)
 
-from . import bitcoin
+
 class Notifier(SynchronizerBase):
     """Watch addresses. Every time the status of an address changes,
     an HTTP POST is sent to the corresponding URL.
@@ -285,9 +285,7 @@ class Notifier(SynchronizerBase):
     async def _on_address_status(self, addr, status):
         self.logger.info(f'new status for addr {addr}')
         headers = {'content-type': 'application/json'}
-        sh = bitcoin.address_to_scripthash(addr)
-        history = await self.network.get_history_for_scripthash(sh)
-        data = {'address': addr, 'status': status,'history': history}
+        data = {'address': addr, 'status': status}
         for url in self.watched_addresses[addr]:
             try:
                 async with make_aiohttp_session(proxy=self.network.proxy, headers=headers) as session:
