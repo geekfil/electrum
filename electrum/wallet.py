@@ -1386,6 +1386,15 @@ class Abstract_Wallet(AddressSynchronizer):
         index = self.get_address_index(addr)
         return self.keystore.decrypt_message(index, message, password)
 
+    def tx_amount(self, txid):
+        for addr in self.db.get_txo(txid):
+            d = self.db.get_txo_addr(txid, addr)
+            for n, v, cb in d:
+                    return v
+        # may occur if wallet is not synchronized
+        return None
+
+
     def txin_value(self, txin):
         txid = txin['prevout_hash']
         prev_n = txin['prevout_n']

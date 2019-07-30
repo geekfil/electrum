@@ -707,11 +707,6 @@ class Commands:
         return True
 
     @command('wn')
-    def getamounttx(self, txid: str):
-        """ return wallet synchronization status """
-        return self.wallet.txin_value(txid);
-
-    @command('wn')
     def is_synchronized(self):
         """ return wallet synchronization status """
         return self.wallet.is_up_to_date()
@@ -763,6 +758,7 @@ class Commands:
         if not self.wallet.db.get_transaction(txid):
             raise Exception("Transaction not in wallet.")
         return {
+            "amount": self.wallet.tx_amount(txid),
             "confirmations": self.wallet.get_tx_height(txid).conf,
         }
 
