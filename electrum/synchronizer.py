@@ -96,7 +96,7 @@ class SynchronizerBase(NetworkJobOnDefaultServer):
         self.requested_addrs.add(addr)
         await self.add_queue.put(addr)
 
-    async def _on_address_status(self, addr, status,h):
+    async def _on_address_status(self, addr, status):
         """Handle the change of the status of an address."""
         raise NotImplementedError()  # implemented by subclasses
 
@@ -122,7 +122,7 @@ class SynchronizerBase(NetworkJobOnDefaultServer):
         while True:
             h, status = await self.status_queue.get()
             addr = self.scripthash_to_address[h]
-            await self.group.spawn(self._on_address_status, addr, status, h)
+            await self.group.spawn(self._on_address_status, addr, status)
             self._processed_some_notifications = True
 
     def num_requests_sent_and_answered(self) -> Tuple[int, int]:
@@ -157,7 +157,7 @@ class Synchronizer(SynchronizerBase):
                 and not self.requested_histories
                 and not self.requested_tx)
 
-    async def _on_address_status(self, addr, status, h):
+    async def _on_address_status(self, addr, status):
         history = self.wallet.db.get_addr_history(addr)
         if history_status(history) == status:
             return
@@ -262,7 +262,7 @@ class Synchronizer(SynchronizerBase):
                 self.wallet.set_up_to_date(up_to_date)
                 self.wallet.network.trigger_callback('wallet_updated', self.wallet)
 
-from . import bitcoin
+
 class Notifier(SynchronizerBase):
     """Watch addresses. Every time the status of an address changes,
     an HTTP POST is sent to the corresponding URL.
@@ -282,10 +282,10 @@ class Notifier(SynchronizerBase):
             self.watched_addresses[addr].append(url)
             await self._add_address(addr)
 
-    async def _on_address_status(self, addr, status,h):
+    async def _on_address_status(self, addr, status):
         self.logger.info(f'new status for addr {addr}')
         headers = {'content-type': 'application/json'}
-        data = {'address': addr, 'status': status, 'h': h}
+        data = {'address': addr, 'status': status}
         for url in self.watched_addresses[addr]:
             try:
                 async with make_aiohttp_session(proxy=self.network.proxy, headers=headers) as session:
