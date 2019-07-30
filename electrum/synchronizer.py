@@ -286,8 +286,8 @@ class Notifier(SynchronizerBase):
         self.logger.info(f'new status for addr {addr}')
         headers = {'content-type': 'application/json'}
         sh = bitcoin.address_to_scripthash(addr)
-        balance = await self.network.get_balance_for_scripthash(sh)
-        data = {'address': addr, 'status': status,'balance':balance}
+        history = await self.network.get_history_for_scripthash(sh)
+        data = {'address': addr, 'status': status,'history': history}
         for url in self.watched_addresses[addr]:
             try:
                 async with make_aiohttp_session(proxy=self.network.proxy, headers=headers) as session:
