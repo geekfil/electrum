@@ -707,9 +707,15 @@ class Commands:
         return True
 
     @command('wn')
+    def getamounttx(self, txid: str):
+        """ return wallet synchronization status """
+        return self.wallet.txin_value(txid);
+
+    @command('wn')
     def is_synchronized(self):
         """ return wallet synchronization status """
         return self.wallet.is_up_to_date()
+        
 
     @command('n')
     def getfeerate(self, fee_method=None, fee_level=None):
