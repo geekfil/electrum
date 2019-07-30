@@ -36,7 +36,7 @@ class Notifier(SynchronizerBase):
             self.watched_addresses.add(addr)
             await self._add_address(addr)
 
-    async def _on_address_status(self, addr, status):
+    async def _on_address_status(self, addr, status, h):
         print_msg(f"addr {addr}, status {status}")
 
 

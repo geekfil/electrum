@@ -101,7 +101,7 @@ class BalanceMonitor(SynchronizerBase):
             self.expected_payments[addr].append((ws, amount))
             await self._add_address(addr)
 
-    async def _on_address_status(self, addr, status):
+    async def _on_address_status(self, addr, status, h):
         self.logger.info(f'new status for addr {addr}')
         sh = bitcoin.address_to_scripthash(addr)
         balance = await self.network.get_balance_for_scripthash(sh)

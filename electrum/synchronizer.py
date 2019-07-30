@@ -96,7 +96,7 @@ class SynchronizerBase(NetworkJobOnDefaultServer):
         self.requested_addrs.add(addr)
         await self.add_queue.put(addr)
 
-    async def _on_address_status(self, addr, status):
+    async def _on_address_status(self, addr, status,h):
         """Handle the change of the status of an address."""
         raise NotImplementedError()  # implemented by subclasses
 
@@ -157,7 +157,7 @@ class Synchronizer(SynchronizerBase):
                 and not self.requested_histories
                 and not self.requested_tx)
 
-    async def _on_address_status(self, addr, status):
+    async def _on_address_status(self, addr, status, h):
         history = self.wallet.db.get_addr_history(addr)
         if history_status(history) == status:
             return
