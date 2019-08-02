@@ -515,6 +515,52 @@ class Commands:
         return json_encode(self.wallet.get_full_history(**kwargs))
 
     @command('w')
+    def all_history(self):
+        """Wallet history. Returns the transaction history of your wallet."""
+        balance = 0
+        out = []
+        for item in self.wallet.get_history():
+            tx_hash, height, conf, timestamp, value, balance = item
+            if timestamp:
+                date = datetime.datetime.fromtimestamp(timestamp).isoformat(' ')[:-3]
+            else:
+                date = "----"
+            label = self.wallet.get_label(tx_hash)
+
+            # START ADDING HERE
+            tx = self.wallet.transactions.get(tx_hash)
+            tx.deserialize()
+            input_addresses = []
+            output_addresses = []
+            for x in tx.inputs():
+                addr = x.get('address')
+                if x['type'] == 'coinbase': continue
+                if addr == None: continue
+                if addr == "(pubkey)":
+                    prevout_hash = x.get('prevout_hash')
+                    prevout_n = x.get('prevout_n')
+                    _addr = self.wallet.find_pay_to_pubkey_address(prevout_hash, prevout_n)
+                    if _addr:
+                        addr = _addr
+                input_addresses.append(addr)
+            for addr, v in tx.get_outputs():
+                output_addresses.append(addr)
+            # END ADDING HERE
+
+            out.append({
+                'txid': tx_hash,
+                'timestamp': timestamp,
+                'date': date,
+                'input_addresses': input_addresses, # ADD THESE TWO LINES AS WELL
+                'output_addresses': output_addresses, # ADD THESE TWO LINES AS WELL
+                'label': label,
+                'value': float(value)/COIN if value is not None else None,
+                'height': height,
+                'confirmations': conf
+            })
+        return out
+
+    @command('w')
     def setlabel(self, key, label):
         """Assign a label to an item. Item may be a bitcoin address or a
         transaction ID"""
